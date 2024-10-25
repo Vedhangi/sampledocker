@@ -2,8 +2,8 @@ pipeline {
     agent any
     environment {
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
-        DOCKER_USERNAME = 'mca2312'      // Your Docker username
-        DOCKER_PASSWORD = 'mca092312'    // Your Docker password
+        DOCKER_USERNAME = 'mca2312'
+        DOCKER_PASSWORD = 'mca092312'
     }
     stages {
         stage('Clean and Clone Repository') {
@@ -14,22 +14,21 @@ pipeline {
         }
         stage('List Files') {
             steps {
-                dir('assig9') {
+                dir('sampledocker/assig9') {
                     bat 'dir'
                 }
             }
         }
         stage('Build') {
             steps {
-                dir('assig9') {
-                    // Corrected build command, assuming Dockerfile is in the 'assig9' directory
+                dir('sampledocker/assig9') {
                     bat 'docker build -t mca2312/sample3 -f Dockerfile .'
                 }
             }
         }
         stage('Login') {
             steps {
-                bat 'docker login -u "mca2312" -p "mca092312" docker.io'
+                bat "echo ${DOCKER_PASSWORD} | docker login -u \"${DOCKER_USERNAME}\" --password-stdin"
             }
         }
         stage('Push') {
@@ -39,8 +38,10 @@ pipeline {
         }
         stage('Run in Daemon Mode') {
             steps {
-                bat 'docker rm -f my_container || true'
-                bat 'docker run -d --name my_container mca2312/sample3'
+                script {
+                    bat 'docker rm -f my_container || true'
+                    bat 'docker run -d --name my_container mca2312/sample3'
+                }
             }
         }
     }
